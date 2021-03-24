@@ -1,0 +1,38 @@
+---
+- name: Install mariadb
+  yum:
+    name: ['mariadb', 'mariadb-server', 'python2-PyMySQL', 'galera', 'mariadb-server-galera', 'rsync']
+    state: present
+
+- name: Config mariadb
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - { src: 'mariadb.service', dest: '/usr/lib/systemd/system/mariadb.service' }
+    - { src: 'openstack.cnf.j2', dest: '/etc/my.cnf.d/openstack.cnf' }
+
+- name: Mariadb daemon-reload
+  shell: systemctl daemon-reload
+
+- name: Restart mariadb service and set auto start
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - "mariadb.service"
+
+- name: Copy init mariadb script
+  template:
+    src: init_mariadb.sh.j2
+    dest: /tmp/init_mariadb.sh
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Init mariadb script
+  shell: sh /tmp/init_mariadb.sh

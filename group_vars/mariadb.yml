@@ -1,0 +1,9 @@
+---
+mariadb_server: "10.10.X.X"
+
+mariadb:
+  admin:
+    user: "root"
+    password: "ThisIsNotAPassword!"
+
+
